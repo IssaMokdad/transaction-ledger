@@ -1,0 +1,26 @@
+version: '3'
+services:
+  # MongoDB container
+  mongodb:
+    image: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Node.js container
+  nodejs:
+    build: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URI: "mongodb://mongodb:27017/yourdb" # Update with your actual database name
+    command: ["npm", "run", "dev"]
+    volumes:
+      - .:/app
+
+volumes:
+  mongodb_data:
