@@ -1,7 +1,7 @@
 import express from 'express';
 import { Request, Response } from 'express';
 import { extractTransactionData, extractPayoutData, extractReportData } from '../utils/dataExtractor';
-import { saveTransaction, savePayout, saveReport } from '../models/modelController';
+import { saveTransaction, savePayout, reconcileTransactions, saveReport } from '../models/modelController';
 
 const router = express.Router();
 
@@ -36,6 +36,24 @@ router.post('/end-of-day-report', async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');
+  }
+});
+
+router.post('/reconcile', async (req: Request, res: Response) => {
+  try {
+    const reportData = req.body; // Assuming reportData is passed in the request body
+
+    // Perform reconciliation
+    const reconciliationResult = await reconcileTransactions(reportData);
+
+    if (reconciliationResult.success) {
+      res.status(200).json({ message: 'Reconciliation successful', data: reconciliationResult });
+    } else {
+      res.status(500).json({ error: 'Failed to reconcile transactions', message: reconciliationResult.error });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
